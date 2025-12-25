@@ -128,11 +128,12 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
+  # Android usa el icono original
   image_path: "assets/JvomKnnYTSKQZP1NvGZT_do.png"
+  # iOS usa icono sin transparencia
+  image_path_ios: "ios/icon.png"
   min_sdk_android: 21
-  # iOS requiere iconos sin transparencia
   remove_alpha_ios: true
-  background_color_ios: "#FFFFFF"
   web:
     generate: true
     image_path: "assets/JvomKnnYTSKQZP1NvGZT_do.png"

@@ -31,86 +31,9 @@ workflows:
         script: |
           flutter packages pub get
       
-      - name: Remove alpha from source icon BEFORE generating icons
-        script: |
-          echo "=== Removing alpha channel from SOURCE icon ==="
-          pip3 install Pillow
-          
-          python3 << 'EOF'
-          from PIL import Image
-          
-          # Process the source icon FIRST
-          source_icon = "assets/JvomKnnYTSKQZP1NvGZT_do.png"
-          print(f"Processing source icon: {source_icon}")
-          
-          img = Image.open(source_icon)
-          print(f"  Original mode: {img.mode}")
-          
-          if img.mode in ('RGBA', 'LA', 'P'):
-              # Create white background
-              background = Image.new('RGB', img.size, (255, 255, 255))
-              
-              if img.mode == 'P':
-                  img = img.convert('RGBA')
-              
-              if img.mode in ('RGBA', 'LA'):
-                  # Split and use alpha as mask
-                  if img.mode == 'RGBA':
-                      r, g, b, a = img.split()
-                      background.paste(img, mask=a)
-                  else:
-                      l, a = img.split()
-                      background.paste(img.convert('RGB'), mask=a)
-              else:
-                  background.paste(img)
-              
-              background.save(source_icon, 'PNG')
-              print(f"  Done: Saved as RGB (no alpha)")
-          else:
-              print(f"  Already RGB, no changes needed")
-          
-          # Verify
-          img_check = Image.open(source_icon)
-          print(f"  Final mode: {img_check.mode}")
-          EOF
-      
-      - name: Generate app icons (from alpha-free source)
+      - name: Generate app icons (using ios/icon.png without transparency)
         script: |
           dart run flutter_launcher_icons
-      
-      - name: Verify iOS icons have no alpha
-        script: |
-          echo "=== Verifying iOS icons ==="
-          python3 << 'EOF'
-          import os
-          from PIL import Image
-          
-          icons_path = "ios/Runner/Assets.xcassets/AppIcon.appiconset"
-          has_alpha = False
-          
-          for filename in os.listdir(icons_path):
-              if filename.endswith('.png'):
-                  filepath = os.path.join(icons_path, filename)
-                  img = Image.open(filepath)
-                  if img.mode in ('RGBA', 'LA', 'P'):
-                      print(f"WARNING: {filename} still has alpha! Mode: {img.mode}")
-                      # Fix it
-                      background = Image.new('RGB', img.size, (255, 255, 255))
-                      if img.mode == 'P':
-                          img = img.convert('RGBA')
-                      if img.mode == 'RGBA':
-                          background.paste(img, mask=img.split()[3])
-                      else:
-                          background.paste(img)
-                      background.save(filepath, 'PNG')
-                      print(f"  Fixed: {filename}")
-                      has_alpha = True
-                  else:
-                      print(f"OK: {filename} - Mode: {img.mode}")
-          
-          if not has_alpha:
-              print("=== All icons verified: No alpha channel ===")
-          EOF
       
       - name: Install CocoaPods dependencies
         script: |
@@ -169,80 +92,9 @@ workflows:
         script: |
           flutter packages pub get
       
-      - name: Remove alpha from source icon BEFORE generating icons
-        script: |
-          echo "=== Removing alpha channel from SOURCE icon ==="
-          pip3 install Pillow
-          
-          python3 << 'EOF'
-          from PIL import Image
-          
-          # Process the source icon FIRST
-          source_icon = "assets/JvomKnnYTSKQZP1NvGZT_do.png"
-          print(f"Processing source icon: {source_icon}")
-          
-          img = Image.open(source_icon)
-          print(f"  Original mode: {img.mode}")
-          
-          if img.mode in ('RGBA', 'LA', 'P'):
-              # Create white background
-              background = Image.new('RGB', img.size, (255, 255, 255))
-              
-              if img.mode == 'P':
-                  img = img.convert('RGBA')
-              
-              if img.mode in ('RGBA', 'LA'):
-                  if img.mode == 'RGBA':
-                      r, g, b, a = img.split()
-                      background.paste(img, mask=a)
-                  else:
-                      l, a = img.split()
-                      background.paste(img.convert('RGB'), mask=a)
-              else:
-                  background.paste(img)
-              
-              background.save(source_icon, 'PNG')
-              print(f"  Done: Saved as RGB (no alpha)")
-          else:
-              print(f"  Already RGB, no changes needed")
-          
-          img_check = Image.open(source_icon)
-          print(f"  Final mode: {img_check.mode}")
-          EOF
-      
-      - name: Generate app icons (from alpha-free source)
+      - name: Generate app icons (using ios/icon.png without transparency)
         script: |
           dart run flutter_launcher_icons
-      
-      - name: Verify iOS icons have no alpha
-        script: |
-          echo "=== Verifying iOS icons ==="
-          python3 << 'EOF'
-          import os
-          from PIL import Image
-          
-          icons_path = "ios/Runner/Assets.xcassets/AppIcon.appiconset"
-          
-          for filename in os.listdir(icons_path):
-              if filename.endswith('.png'):
-                  filepath = os.path.join(icons_path, filename)
-                  img = Image.open(filepath)
-                  if img.mode in ('RGBA', 'LA', 'P'):
-                      print(f"WARNING: {filename} still has alpha! Mode: {img.mode}")
-                      background = Image.new('RGB', img.size, (255, 255, 255))
-                      if img.mode == 'P':
-                          img = img.convert('RGBA')
-                      if img.mode == 'RGBA':
-                          background.paste(img, mask=img.split()[3])
-                      else:
-                          background.paste(img)
-                      background.save(filepath, 'PNG')
-                      print(f"  Fixed: {filename}")
-                  else:
-                      print(f"OK: {filename} - Mode: {img.mode}")
-          
-          print("=== All icons verified ===")
-          EOF
       
       - name: Install CocoaPods dependencies
         script: |
