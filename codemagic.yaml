@@ -31,25 +31,42 @@ workflows:
         script: |
           flutter packages pub get
       
-      - name: Generate app icons (removes transparency for iOS)
+      - name: Generate app icons
         script: |
           dart run flutter_launcher_icons
       
-      - name: Remove alpha channel from iOS icons
+      - name: Remove alpha channel from iOS icons (using native macOS tools)
         script: |
-          echo "Removing alpha channel from iOS app icons..."
+          echo "=== Removing alpha channel from iOS app icons ==="
           ICONS_PATH="ios/Runner/Assets.xcassets/AppIcon.appiconset"
+          
+          # Install imagemagick via brew if not available
+          if ! command -v magick &> /dev/null; then
+            echo "Installing ImageMagick..."
+            brew install imagemagick
+          fi
+          
           for icon in "$ICONS_PATH"/*.png; do
             if [ -f "$icon" ]; then
               echo "Processing: $icon"
-              # Use sips to remove alpha channel by adding white background
-              sips -s format png --setProperty formatOptions 100 "$icon" --out "$icon.tmp"
-              # Convert to remove transparency using ImageMagick (available on Codemagic)
-              convert "$icon" -background white -alpha remove -alpha off "$icon"
-              echo "Done: $icon"
+              # Get dimensions
+              WIDTH=$(sips -g pixelWidth "$icon" | tail -1 | awk '{print $2}')
+              HEIGHT=$(sips -g pixelHeight "$icon" | tail -1 | awk '{print $2}')
+              echo "  Dimensions: ${WIDTH}x${HEIGHT}"
+              
+              # Create a white background image and composite
+              TEMP_BG="/tmp/white_bg_${WIDTH}x${HEIGHT}.png"
+              TEMP_OUT="/tmp/output_icon.png"
+              
+              # Use magick (ImageMagick 7) to flatten with white background
+              magick "$icon" -background white -flatten -alpha off "$TEMP_OUT"
+              
+              # Replace original
+              mv "$TEMP_OUT" "$icon"
+              echo "  Done: Alpha removed"
             fi
           done
-          echo "All icons processed!"
+          echo "=== All icons processed! ==="
       
       - name: Install CocoaPods dependencies
         script: |
@@ -108,23 +125,41 @@ workflows:
         script: |
           flutter packages pub get
       
-      - name: Generate app icons (removes transparency for iOS)
+      - name: Generate app icons
         script: |
           dart run flutter_launcher_icons
       
-      - name: Remove alpha channel from iOS icons
+      - name: Remove alpha channel from iOS icons (using native macOS tools)
         script: |
-          echo "Removing alpha channel from iOS app icons..."
+          echo "=== Removing alpha channel from iOS app icons ==="
           ICONS_PATH="ios/Runner/Assets.xcassets/AppIcon.appiconset"
+          
+          # Install imagemagick via brew if not available
+          if ! command -v magick &> /dev/null; then
+            echo "Installing ImageMagick..."
+            brew install imagemagick
+          fi
+          
           for icon in "$ICONS_PATH"/*.png; do
             if [ -f "$icon" ]; then
               echo "Processing: $icon"
-              # Convert to remove transparency using ImageMagick (available on Codemagic)
-              convert "$icon" -background white -alpha remove -alpha off "$icon"
-              echo "Done: $icon"
+              # Get dimensions
+              WIDTH=$(sips -g pixelWidth "$icon" | tail -1 | awk '{print $2}')
+              HEIGHT=$(sips -g pixelHeight "$icon" | tail -1 | awk '{print $2}')
+              echo "  Dimensions: ${WIDTH}x${HEIGHT}"
+              
+              # Create temp output
+              TEMP_OUT="/tmp/output_icon.png"
+              
+              # Use magick (ImageMagick 7) to flatten with white background
+              magick "$icon" -background white -flatten -alpha off "$TEMP_OUT"
+              
+              # Replace original
+              mv "$TEMP_OUT" "$icon"
+              echo "  Done: Alpha removed"
             fi
           done
-          echo "All icons processed!"
+          echo "=== All icons processed! ==="
       
       - name: Install CocoaPods dependencies
         script: |
