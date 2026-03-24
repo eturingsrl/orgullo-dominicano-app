@@ -90,10 +90,5 @@
 		<string>es</string>
 		<string>en</string>
 	</array>
-	<!-- Soporte para modo background (para video) -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-	</array>
 </dict>
 </plist>
