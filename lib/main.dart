@@ -448,6 +448,16 @@ class _WebViewScreenState extends State<WebViewScreen> {
               return NavigationDecision.navigate;
             }
             
+            // Bloquear URLs de ads/tracking para que no abran Safari
+            if (request.url.contains('googlesyndication.com') ||
+                request.url.contains('googleads.') ||
+                request.url.contains('doubleclick.net') ||
+                request.url.contains('google-analytics.com') ||
+                request.url.contains('googletagmanager.com') ||
+                request.url.contains('adservice.google.')) {
+              return NavigationDecision.prevent;
+            }
+            
             // Abrir enlaces externos en el navegador
             _launchExternalUrl(request.url);
             return NavigationDecision.prevent;
