@@ -448,13 +448,17 @@ class _WebViewScreenState extends State<WebViewScreen> {
               return NavigationDecision.navigate;
             }
             
-            // Bloquear URLs de ads/tracking para que no abran Safari
+            // Bloquear widgets, ads y servicios embebidos para que no abran Safari
             if (request.url.contains('googlesyndication.com') ||
                 request.url.contains('googleads.') ||
                 request.url.contains('doubleclick.net') ||
                 request.url.contains('google-analytics.com') ||
                 request.url.contains('googletagmanager.com') ||
-                request.url.contains('adservice.google.')) {
+                request.url.contains('adservice.google.') ||
+                request.url.contains('weatherwidget.io') ||
+                request.url.contains('widget') ||
+                request.url.contains('embed') ||
+                request.url.contains('syndication')) {
               return NavigationDecision.prevent;
             }
             
