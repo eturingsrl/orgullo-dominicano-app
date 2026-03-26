@@ -439,31 +439,36 @@ class _WebViewScreenState extends State<WebViewScreen> {
             debugPrint('WebView error: ${error.description}');
           },
           onNavigationRequest: (NavigationRequest request) {
+            final url = request.url;
+            
             // Permitir navegación dentro del dominio principal
-            if (request.url.contains('orgullodominicano.org') ||
-                request.url.startsWith('https://www.google.com') ||
-                request.url.startsWith('https://www.facebook.com') ||
-                request.url.startsWith('https://www.twitter.com') ||
-                request.url.startsWith('https://www.instagram.com')) {
+            if (url.contains('orgullodominicano.org')) {
               return NavigationDecision.navigate;
             }
             
-            // Bloquear widgets, ads y servicios embebidos para que no abran Safari
-            if (request.url.contains('googlesyndication.com') ||
-                request.url.contains('googleads.') ||
-                request.url.contains('doubleclick.net') ||
-                request.url.contains('google-analytics.com') ||
-                request.url.contains('googletagmanager.com') ||
-                request.url.contains('adservice.google.') ||
-                request.url.contains('weatherwidget.io') ||
-                request.url.contains('widget') ||
-                request.url.contains('embed') ||
-                request.url.contains('syndication')) {
+            // Bloquear silenciosamente ads, widgets, tracking y servicios embebidos
+            if (url.contains('google') ||
+                url.contains('doubleclick') ||
+                url.contains('syndication') ||
+                url.contains('adtrafficquality') ||
+                url.contains('adservice') ||
+                url.contains('googleads') ||
+                url.contains('widget') ||
+                url.contains('embed') ||
+                url.contains('analytics') ||
+                url.contains('tagmanager') ||
+                url.contains('facebook.com/tr') ||
+                url.contains('connect.facebook') ||
+                url.contains('platform.twitter') ||
+                url.contains('cdn.') ||
+                url.contains('pixel') ||
+                url.contains('tracker') ||
+                url.contains('ads.')) {
               return NavigationDecision.prevent;
             }
             
-            // Abrir enlaces externos en el navegador
-            _launchExternalUrl(request.url);
+            // Solo abrir en Safari enlaces reales que el usuario toque
+            _launchExternalUrl(url);
             return NavigationDecision.prevent;
           },
         ),
